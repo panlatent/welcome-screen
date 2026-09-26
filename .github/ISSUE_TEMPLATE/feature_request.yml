@@ -1,0 +1,23 @@
+name: Feature request
+description: Suggest an idea for WelcomeScreen
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / use case
+      description: What are you trying to achieve? Where does the current app fall short?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What would you like to happen? Keep in mind this project deliberately favors simple, template-driven configuration over free-form options.
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I checked existing issues and the roadmap in the README
+          required: true

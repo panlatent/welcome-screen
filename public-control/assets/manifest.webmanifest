@@ -1,0 +1,22 @@
+{
+  "name": "欢迎屏控制端",
+  "short_name": "欢迎屏",
+  "description": "大屏欢迎词应用的手机控制端",
+  "lang": "zh-CN",
+  "display": "standalone",
+  "start_url": "./",
+  "background_color": "#101418",
+  "theme_color": "#101418",
+  "icons": [
+    {
+      "src": "assets/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

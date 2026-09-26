@@ -1,0 +1,102 @@
+/* Big-screen global styles: fullscreen, no text selection or system gestures */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+}
+
+body {
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+  color: #fff;
+}
+
+img {
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+
+/* Burn-in protection: slow content drift and background zoom keep pixels moving */
+@keyframes anti-burn-drift {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(6px, -4px);
+  }
+  50% {
+    transform: translate(-5px, 5px);
+  }
+  75% {
+    transform: translate(4px, 4px);
+  }
+  100% {
+    transform: translate(-6px, -5px);
+  }
+}
+.anti-burn {
+  animation: anti-burn-drift 96s ease-in-out infinite alternate;
+}
+
+@keyframes slow-zoom {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.035);
+  }
+}
+.slow-zoom {
+  animation: slow-zoom 260s ease-in-out infinite alternate;
+}
+
+/* Cross-fade on config changes. Uses CSS animations (compositor-driven, `both`
+   fill) instead of transitions so the screen never gets stuck transparent if
+   Vue's transition classes are removed late. */
+@keyframes screen-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes screen-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+.screen-fade-enter-active {
+  animation: screen-in 0.7s ease both;
+}
+.screen-fade-leave-active {
+  animation: screen-out 0.35s ease both;
+}
+
+/* QR card transition */
+.pop-fade-enter-active,
+.pop-fade-leave-active {
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease;
+}
+.pop-fade-enter-from,
+.pop-fade-leave-to {
+  opacity: 0;
+  transform: translateY(12px);
+}

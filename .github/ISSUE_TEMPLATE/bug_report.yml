@@ -1,0 +1,56 @@
+name: Bug report
+description: Report a problem with the kiosk app or the control page
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Also tell us what you expected to happen instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Launch the app on ...
+        2. Long-press ...
+        3. See error
+    validations:
+      required: true
+  - type: dropdown
+    id: component
+    attributes:
+      label: Which part is affected?
+      options:
+        - Big screen (kiosk window)
+        - Phone control page
+        - Installer / first run
+        - Networking (QR, token, multi-NIC)
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      placeholder: Windows 11 23H2
+    validations:
+      required: true
+  - type: textarea
+    id: network
+    attributes:
+      label: Network setup
+      description: Screen on Wi-Fi or Ethernet? Phone on the same network? Corporate Wi-Fi / AP isolation? Multiple adapters?
+  - type: textarea
+    id: logs
+    attributes:
+      label: Anything else?

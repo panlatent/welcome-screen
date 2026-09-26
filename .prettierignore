@@ -1,0 +1,10 @@
+node_modules/
+dist/
+dist-control/
+src-tauri/target/
+src-tauri/gen/
+src-tauri/capabilities/
+src-tauri/icons/
+public-control/assets/
+package-lock.json
+CHANGELOG.md

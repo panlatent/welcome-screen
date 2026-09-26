@@ -1,0 +1,37 @@
+[package]
+name = "welcome-screen"
+version = "0.1.0"
+description = "Kiosk welcome-screen app for Windows lobbies"
+authors = ["panlatent"]
+license = "MIT"
+repository = "https://github.com/panlatent/welcome-screen"
+edition = "2021"
+
+[lib]
+name = "welcome_screen_lib"
+crate-type = ["rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-autostart = "2"
+tauri-plugin-opener = "2"
+tauri-plugin-single-instance = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["net", "fs", "macros", "rt-multi-thread"] }
+axum = { version = "0.8", features = ["multipart"] }
+tower-http = { version = "0.6", features = ["fs"] }
+tower = "0.5"
+local-ip-address = "0.6"
+uuid = { version = "1", features = ["v4"] }
+
+# Smaller binaries for the unsigned NSIS installer (Tauri size guide)
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = "s"
+strip = true
+panic = "abort"
