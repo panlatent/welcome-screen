@@ -1,0 +1,54 @@
+{
+  "name": "welcome-screen",
+  "description": "Kiosk welcome-screen app for Windows lobbies: fullscreen greeting rendered on a big touch screen, managed from a phone over LAN.",
+  "license": "MIT",
+  "author": "panlatent",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/panlatent/welcome.git"
+  },
+  "bugs": {
+    "url": "https://github.com/panlatent/welcome/issues"
+  },
+  "homepage": "https://github.com/panlatent/welcome#readme",
+  "keywords": [
+    "tauri",
+    "vue3",
+    "kiosk",
+    "digital-signage",
+    "welcome-screen",
+    "windows"
+  ],
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run build:main && npm run build:control",
+    "build:main": "vite build",
+    "build:control": "vite build --config vite.control.config.ts",
+    "tauri": "tauri",
+    "typecheck": "vue-tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "node scripts/regression-test.mjs",
+    "icon": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/gen-icon.ps1 && tauri icon app-icon.png"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.9.0",
+    "qrcode": "^1.5.4",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.9.6",
+    "@types/qrcode": "^1.5.5",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "prettier": "^3.9.9",
+    "typescript": "~5.6.3",
+    "vite": "^6.3.6",
+    "vue-tsc": "^2.2.0"
+  }
+}
