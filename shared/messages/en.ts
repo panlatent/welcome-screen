@@ -186,4 +186,7 @@ export const en: Messages = {
   "qr.autoClose": "Closes in {n} s · tap outside to close",
   "qr.openLocal": "Open on this PC",
   "qr.openFailed": "Failed to open",
+  "qr.minimize": "Minimize",
+  "qr.exit": "Exit",
+  "qr.exitConfirm": "Tap again to exit",
 };

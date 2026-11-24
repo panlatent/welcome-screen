@@ -173,6 +173,9 @@ export const zhCN = {
   "qr.autoClose": "{n} 秒后自动关闭 · 点击空白处关闭",
   "qr.openLocal": "在本机浏览器打开",
   "qr.openFailed": "打开失败",
+  "qr.minimize": "最小化",
+  "qr.exit": "退出程序",
+  "qr.exitConfirm": "再点一次确认退出",
 } as const;
 
 /** Shape every catalog must satisfy (keys from zh-CN, string values) */

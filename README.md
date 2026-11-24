@@ -70,6 +70,9 @@ take effect within a second, with a smooth cross-fade.
   for each of them at once
 - **No phone needed** — a button under the QR code opens the control page in the
   kiosk's own browser (loopback URL, unaffected by firewall rules or adapter choice)
+- **Minimize & exit** — under the QR code, one tap minimizes the screen to the taskbar
+  (tap its taskbar button to bring fullscreen back) or exits the app (a second tap
+  confirms)
 - **Live preview** — the control page renders a scaled 16:9 preview of the actual
   template while you type
 - **Wide-screen layout** — on viewports ≥1024px wide the control page switches to a
@@ -169,6 +172,12 @@ config.
 Summon the QR code (long-press the bottom corner; a fresh install shows it anyway)
 and tap "Open on this PC" below it — the control page opens in the kiosk's own
 browser over the loopback address, no scanning involved.
+
+**How do I minimize or quit the welcome screen?**
+In the same place: tap "Minimize" to collapse the screen onto the taskbar — tap its
+taskbar button to bring the fullscreen welcome screen back. "Exit" asks for a second
+tap to confirm; relaunch the app afterwards (with auto-start enabled it also comes
+back on the next boot).
 
 **The phone cannot open the control page after scanning.**
 Phone and screen must be on the same LAN. Corporate Wi-Fi with AP isolation or guest

@@ -43,6 +43,23 @@ fn get_connection_info(state: tauri::State<SharedState>) -> ConnectionInfo {
     }
 }
 
+/// Leave the kiosk screen for the desktop. The window has no taskbar button of its own
+/// (skipTaskbar), so one is added right after minimizing: it is the way back into
+/// fullscreen. Adding it before minimizing does not stick.
+#[tauri::command]
+fn minimize_screen(app: tauri::AppHandle) {
+    if let Some(win) = app.get_webview_window("main") {
+        let _ = win.minimize();
+        let _ = win.set_skip_taskbar(false);
+    }
+}
+
+/// Quit the welcome screen. It returns on the next launch, or on boot with auto-start on.
+#[tauri::command]
+fn exit_app(app: tauri::AppHandle) {
+    app.exit(0);
+}
+
 pub fn run() {
     tauri::Builder::default()
         // Must be registered first: a second launch exits and focuses the existing window
@@ -78,7 +95,22 @@ pub fn run() {
             server::spawn(state, listener);
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_config, get_connection_info])
+        .invoke_handler(tauri::generate_handler![
+            get_config,
+            get_connection_info,
+            minimize_screen,
+            exit_app
+        ])
+        .on_window_event(|window, event| {
+            // Windows reports a 0x0 client size while minimized: a real size means the
+            // window is back (taskbar click, second launch) — hide the taskbar button
+            // again (see minimize_screen)
+            if let tauri::WindowEvent::Resized(size) = event {
+                if size.width > 0 && size.height > 0 {
+                    let _ = window.set_skip_taskbar(true);
+                }
+            }
+        })
         .run(tauri::generate_context!())
         .expect("WelcomeScreen exited unexpectedly");
 }

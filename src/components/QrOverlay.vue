@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onUnmounted, ref, watch } from "vue";
 import QRCode from "qrcode";
+import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { t } from "../../shared/i18n";
 import type { SummonCorner } from "../../shared/types";
@@ -21,8 +22,11 @@ const model = defineModel<boolean>({ required: true });
 const countdown = ref(props.seconds);
 const canvasRefs = ref<(HTMLCanvasElement | null)[]>([]);
 const openFailed = ref(false);
+// Exit needs a second tap: the overlay is only a long-press away for anyone at the screen
+const confirmingExit = ref(false);
 let timer = 0;
 let failTimer = 0;
+let confirmTimer = 0;
 
 // setup mode: up to 3 cards; normal mode: a single card
 const cards = computed(() =>
@@ -36,6 +40,7 @@ watch(
   async ([visible]) => {
     if (!(visible || props.persistent)) {
       window.clearInterval(timer);
+      confirmingExit.value = false;
       return;
     }
     countdown.value = Math.max(5, props.seconds);
@@ -80,8 +85,34 @@ async function openLocal() {
   }
 }
 
+// Leave the fullscreen screen for the desktop; the window stays reachable on the taskbar
+function minimize() {
+  if (!props.persistent) model.value = false;
+  invoke("minimize_screen").catch((err) =>
+    console.error("[qr] failed to minimize the screen", err),
+  );
+}
+
+async function requestExit() {
+  if (!confirmingExit.value) {
+    confirmingExit.value = true;
+    window.clearTimeout(confirmTimer);
+    confirmTimer = window.setTimeout(
+      () => (confirmingExit.value = false),
+      3000,
+    );
+    return;
+  }
+  try {
+    await invoke("exit_app");
+  } catch (err) {
+    console.error("[qr] failed to exit the app", err);
+  }
+}
+
 onUnmounted(() => {
   window.clearTimeout(failTimer);
+  window.clearTimeout(confirmTimer);
 });
 </script>
 
@@ -105,14 +136,29 @@ onUnmounted(() => {
             <div v-if="card.ip" class="qr-ip">{{ card.ip }}</div>
           </div>
         </div>
-        <button
-          type="button"
-          class="qr-open-local"
-          :class="{ failed: openFailed }"
-          @click="openLocal"
-        >
-          {{ openFailed ? t("qr.openFailed") : t("qr.openLocal") }}
-        </button>
+        <div class="qr-btn-row">
+          <button
+            type="button"
+            class="qr-btn"
+            :class="{ failed: openFailed }"
+            @click="openLocal"
+          >
+            {{ openFailed ? t("qr.openFailed") : t("qr.openLocal") }}
+          </button>
+        </div>
+        <div class="qr-btn-row">
+          <button type="button" class="qr-btn" @click="minimize">
+            {{ t("qr.minimize") }}
+          </button>
+          <button
+            type="button"
+            class="qr-btn danger"
+            :class="{ confirm: confirmingExit }"
+            @click="requestExit"
+          >
+            {{ confirmingExit ? t("qr.exitConfirm") : t("qr.exit") }}
+          </button>
+        </div>
         <div v-if="!persistent" class="qr-url">{{ url }}</div>
         <div v-if="!persistent" class="qr-hint">
           {{ t("qr.autoClose", { n: countdown }) }}
@@ -184,10 +230,14 @@ onUnmounted(() => {
   color: #444;
   font-family: Consolas, monospace;
 }
-.qr-open-local {
-  margin-top: 14px;
-  width: 100%;
+.qr-btn-row {
+  display: flex;
+  gap: 10px;
+}
+.qr-btn {
+  flex: 1;
   height: 48px;
+  margin-top: 14px;
   border-radius: 10px;
   border: 1.5px solid #b8ada0;
   background: #fff;
@@ -197,12 +247,17 @@ onUnmounted(() => {
   cursor: pointer;
   touch-action: manipulation;
 }
-.qr-open-local:active {
+.qr-btn:active {
   background: #f4efe8;
 }
-.qr-open-local.failed {
+.qr-btn.failed,
+.qr-btn.danger {
   border-color: #c0392b;
   color: #c0392b;
+}
+.qr-btn.confirm {
+  background: #c0392b;
+  color: #fff;
 }
 .qr-url {
   margin-top: 10px;
