@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { MARQUEE_DURATION, type WelcomeConfig } from "../types";
+import { clampTextScale, fitFont, type FitOptions } from "../fit";
 import { resolveLocale } from "../i18n";
 import { formatDate, formatTime, useNow } from "../time";
 
@@ -8,6 +9,44 @@ const props = defineProps<{ config: WelcomeConfig; fileBase: string }>();
 const now = useNow();
 // Screen chrome follows the configured locale ("auto" = the kiosk OS language)
 const tplLocale = computed(() => resolveLocale(props.config.settings?.locale));
+
+// Greeting text auto-fit: sizes shrink with the text length to keep each line
+// intact (84cqw = the content area inside the 8cqw side paddings); the manual
+// textScale preference only moves the cap, so it can enlarge but never wrap
+const scale = computed(() => clampTextScale(props.config.textScale));
+const solo = computed(() => !props.config.welcome.guest);
+
+function fitStyle(text: string, opts: Omit<FitOptions, "scale">) {
+  const fit = fitFont(text, { ...opts, scale: scale.value });
+  return { fontSize: fit.fontSize, whiteSpace: fit.wrap ? "normal" : "nowrap" };
+}
+const titleStyle = computed(() =>
+  fitStyle(props.config.welcome.title, {
+    maxWidth: 84,
+    letterEm: 0.6,
+    capW: solo.value ? 8 : 4.6,
+    capH: solo.value ? 15 : 8,
+    floorW: 2,
+  }),
+);
+const guestStyle = computed(() =>
+  fitStyle(props.config.welcome.guest, {
+    maxWidth: 84,
+    letterEm: 0.08,
+    capW: 10,
+    capH: 18,
+    floorW: 3.8,
+  }),
+);
+const subtitleStyle = computed(() =>
+  fitStyle(props.config.welcome.subtitle, {
+    maxWidth: 84,
+    letterEm: 0.45,
+    capW: 3.6,
+    capH: 6.5,
+    floorW: 1.8,
+  }),
+);
 
 const bgStyle = computed(() => {
   const base = "linear-gradient(160deg, #faf7f2 0%, #f1ece3 60%, #e8e2d8 100%)";
@@ -40,13 +79,18 @@ const marqueeDuration = computed(
           v-if="config.welcome.title"
           class="title"
           :class="{ solo: !config.welcome.guest }"
+          :style="titleStyle"
         >
           {{ config.welcome.title }}
         </h1>
-        <div v-if="config.welcome.guest" class="guest">
+        <div v-if="config.welcome.guest" class="guest" :style="guestStyle">
           {{ config.welcome.guest }}
         </div>
-        <div v-if="config.welcome.subtitle" class="subtitle">
+        <div
+          v-if="config.welcome.subtitle"
+          class="subtitle"
+          :style="subtitleStyle"
+        >
           {{ config.welcome.subtitle }}
         </div>
         <div class="seal" :class="{ latin: tplLocale === 'en' }">
@@ -123,37 +167,38 @@ const marqueeDuration = computed(
   color: #2b2926;
 }
 
+/* Font sizes come from fitFont() inline styles (auto-fit + manual textScale);
+   balance evens out the rare fallback to multiple lines */
 .title {
-  font-size: min(4.6cqw, 8cqh);
   font-weight: 300;
   letter-spacing: 0.6em;
   text-indent: 0.6em;
   color: #6f6a62;
   margin-bottom: 4cqh;
+  text-wrap: balance;
 }
 .title.solo {
-  font-size: min(8cqw, 15cqh);
   font-weight: 200;
   color: #2b2926;
 }
 
 .guest {
-  font-size: min(10cqw, 18cqh);
   font-weight: 200;
   letter-spacing: 0.08em;
   line-height: 1.25;
   max-width: 84cqw;
   word-break: break-word;
   color: #211f1c;
+  text-wrap: balance;
 }
 
 .subtitle {
   margin-top: 3.5cqh;
-  font-size: min(3.6cqw, 6.5cqh);
   font-weight: 300;
   letter-spacing: 0.45em;
   text-indent: 0.45em;
   color: #8a847a;
+  text-wrap: balance;
 }
 
 .seal {

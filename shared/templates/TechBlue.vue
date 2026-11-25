@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { MARQUEE_DURATION, type WelcomeConfig } from "../types";
+import { clampTextScale, fitFont, type FitOptions } from "../fit";
 import { resolveLocale } from "../i18n";
 import { formatDate, formatTime, useNow } from "../time";
 
@@ -8,6 +9,66 @@ const props = defineProps<{ config: WelcomeConfig; fileBase: string }>();
 const now = useNow();
 // Screen chrome follows the configured locale ("auto" = the kiosk OS language)
 const tplLocale = computed(() => resolveLocale(props.config.settings?.locale));
+
+// Greeting text auto-fit: sizes shrink with the text length to keep each line
+// intact; the manual textScale preference only moves the cap, so it can enlarge
+// but never wrap
+const scale = computed(() => clampTextScale(props.config.textScale));
+const solo = computed(() => !props.config.welcome.guest);
+
+function fitStyle(text: string, opts: Omit<FitOptions, "scale">) {
+  const fit = fitFont(text, { ...opts, scale: scale.value });
+  return { fontSize: fit.fontSize, whiteSpace: fit.wrap ? "normal" : "nowrap" };
+}
+const guestStyle = computed(() =>
+  fitStyle(props.config.welcome.guest, {
+    maxWidth: 84,
+    letterEm: 0.05,
+    capW: 10.5,
+    capH: 19,
+    floorW: 3.8,
+  }),
+);
+const subtitleStyle = computed(() =>
+  fitStyle(props.config.welcome.subtitle, {
+    maxWidth: 84,
+    letterEm: 0.5,
+    capW: 3.8,
+    capH: 7,
+    floorW: 1.8,
+  }),
+);
+
+// The title's decorative side lines eat 24cqw of the 84cqw content area; once
+// the title has to shrink well below its design size, hide them and let the
+// text use the full width instead
+const LINE_WIDTH_CQW = 9;
+const LINE_GAP_CQW = 3;
+const titleRow = computed(() => {
+  const base = {
+    letterEm: 0.42,
+    capW: solo.value ? 9 : 5,
+    capH: solo.value ? 16 : 9,
+    floorW: 2,
+  };
+  const withLines = fitFont(props.config.welcome.title, {
+    ...base,
+    maxWidth: 84 - 2 * (LINE_WIDTH_CQW + LINE_GAP_CQW),
+    scale: scale.value,
+  });
+  const hideLines =
+    withLines.wrap || withLines.sizeCqw < base.capW * scale.value * 0.6;
+  if (hideLines) {
+    return {
+      style: fitStyle(props.config.welcome.title, { ...base, maxWidth: 84 }),
+      lines: false,
+    };
+  }
+  return {
+    style: { fontSize: withLines.fontSize, whiteSpace: "nowrap" },
+    lines: true,
+  };
+});
 
 const bgStyle = computed(() => {
   const base =
@@ -54,14 +115,20 @@ const marqueeDuration = computed(
           class="title-row"
           :class="{ solo: !config.welcome.guest }"
         >
-          <span class="line"></span>
-          <h1 class="title">{{ config.welcome.title }}</h1>
-          <span class="line"></span>
+          <span v-if="titleRow.lines" class="line"></span>
+          <h1 class="title" :style="titleRow.style">
+            {{ config.welcome.title }}
+          </h1>
+          <span v-if="titleRow.lines" class="line"></span>
         </div>
-        <div v-if="config.welcome.guest" class="guest">
+        <div v-if="config.welcome.guest" class="guest" :style="guestStyle">
           {{ config.welcome.guest }}
         </div>
-        <div v-if="config.welcome.subtitle" class="subtitle">
+        <div
+          v-if="config.welcome.subtitle"
+          class="subtitle"
+          :style="subtitleStyle"
+        >
           {{ config.welcome.subtitle }}
         </div>
       </main>
@@ -186,20 +253,20 @@ const marqueeDuration = computed(
 .title-row .line:last-child {
   background: linear-gradient(90deg, #6fc3ff, transparent);
 }
+/* Font sizes come from fitFont() inline styles (auto-fit + manual textScale);
+   balance evens out the rare fallback to multiple lines */
 .title {
-  font-size: min(5cqw, 9cqh);
   font-weight: 500;
   letter-spacing: 0.42em;
   text-indent: 0.42em;
   color: #9fd0ff;
+  text-wrap: balance;
 }
 .title-row.solo .title {
-  font-size: min(9cqw, 16cqh);
   color: #eaf4ff;
 }
 
 .guest {
-  font-size: min(10.5cqw, 19cqh);
   font-weight: 700;
   color: #ffffff;
   letter-spacing: 0.05em;
@@ -209,15 +276,16 @@ const marqueeDuration = computed(
   text-shadow:
     0 0 22px rgba(111, 195, 255, 0.55),
     0 0 60px rgba(87, 108, 188, 0.4);
+  text-wrap: balance;
 }
 
 .subtitle {
   margin-top: 3.5cqh;
-  font-size: min(3.8cqw, 7cqh);
   font-weight: 300;
   letter-spacing: 0.5em;
   text-indent: 0.5em;
   color: rgba(200, 224, 255, 0.85);
+  text-wrap: balance;
 }
 
 .corner-info {

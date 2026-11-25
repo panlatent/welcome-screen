@@ -42,6 +42,9 @@ export const en: Messages = {
   "greeting.guestPlaceholder": "e.g. Mr. Smith & party",
   "greeting.subtitleLabel": "Closing line",
   "greeting.subtitlePlaceholder": "e.g. Thank you for visiting",
+  "greeting.scaleLabel": "Text size",
+  "greeting.scaleTip":
+    "Scales the greeting text as a whole; long text is auto-shrunk on the screen to stay on one line",
 
   // Template picker
   "template.title": "Screen Template",
@@ -137,7 +140,7 @@ export const en: Messages = {
   // Welcome profiles card
   "profile.title": "Welcome Profiles",
   "profile.tip":
-    "Save multiple looks and switch with one tap. A profile covers the template, greeting, background, logo and on-screen elements; language, network and other device settings stay unchanged.",
+    "Save multiple looks and switch with one tap. A profile covers the template, greeting, text size, background, logo and on-screen elements; language, network and other device settings stay unchanged.",
   "profile.empty": "No saved profiles yet",
   "profile.active": "Active",
   "profile.apply": "Apply",

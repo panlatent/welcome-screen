@@ -271,6 +271,27 @@ async function runTests() {
     r.body.settings?.locale,
   );
 
+  // --- Manual text-size preference ---
+  r = await put({ ...cfg, textScale: 3 });
+  check(
+    "textScale clamped to 1.5",
+    r.body.textScale === 1.5,
+    String(r.body.textScale),
+  );
+  r = await put({ ...cfg, textScale: 0 });
+  check(
+    "textScale clamped to 0.8",
+    r.body.textScale === 0.8,
+    String(r.body.textScale),
+  );
+  const { textScale: _dropped, ...cfgNoScale } = cfg;
+  r = await put(cfgNoScale);
+  check(
+    "missing textScale defaults to 1",
+    r.body.textScale === 1,
+    String(r.body.textScale),
+  );
+
   // --- Welcome profiles ---
   let res, info;
   const profilesUrl = `${base}/api/profiles?t=${token}`;
@@ -281,6 +302,7 @@ async function runTests() {
     background: fileC,
     logo: "",
     elements: { clock: false, date: true, marquee: "" },
+    textScale: 1.2,
   };
   res = await fetch(profilesUrl, {
     method: "POST",
@@ -318,6 +340,11 @@ async function runTests() {
     "activate swaps the greeting",
     act.config?.welcome?.title === "欢迎" &&
       act.config?.elements?.clock === false,
+  );
+  check(
+    "activate applies the profile textScale",
+    act.config?.textScale === 1.2,
+    String(act.config?.textScale),
   );
   // JSON.stringify alone would false-fail on key order: the activate response
   // nests the config inside a json! value (alphabetical keys), GET does not

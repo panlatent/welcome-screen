@@ -39,6 +39,9 @@ export const zhCN = {
   "greeting.guestPlaceholder": "如：张三一行",
   "greeting.subtitleLabel": "结束语",
   "greeting.subtitlePlaceholder": "如：莅临参观指导",
+  "greeting.scaleLabel": "文字大小",
+  "greeting.scaleTip":
+    "整体缩放欢迎词字号；文字较长时大屏会自动缩小以保证单行显示",
 
   // Template picker
   "template.title": "画面模板",
@@ -126,7 +129,7 @@ export const zhCN = {
   // Welcome profiles card
   "profile.title": "欢迎方案",
   "profile.tip":
-    "保存多套欢迎画面，一键切换。方案包含模板、欢迎词、背景、Logo 与显示元素；语言、网络等设备设置保持不变。",
+    "保存多套欢迎画面，一键切换。方案包含模板、欢迎词、文字大小、背景、Logo 与显示元素；语言、网络等设备设置保持不变。",
   "profile.empty": "还没有保存的方案",
   "profile.active": "使用中",
   "profile.apply": "应用",

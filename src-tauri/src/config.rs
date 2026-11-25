@@ -150,7 +150,7 @@ impl Default for Settings {
     }
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default)]
 pub struct WelcomeConfig {
     pub template_id: String,
@@ -161,12 +161,32 @@ pub struct WelcomeConfig {
     pub logo: String,
     pub elements: Elements,
     pub settings: Settings,
+    /// Manual greeting text-size preference (0.8–1.5; 1 = the template design
+    /// size). Only moves the auto-fit size cap, so it can enlarge short text
+    /// but never wraps a line — see shared/fit.ts.
+    pub text_scale: f64,
+}
+
+// Manual Default instead of derive: text_scale must default to 1.0, not 0.0
+// (missing-field configs and fresh installs are filled from this impl).
+impl Default for WelcomeConfig {
+    fn default() -> Self {
+        Self {
+            template_id: String::new(),
+            welcome: WelcomeText::default(),
+            background: String::new(),
+            logo: String::new(),
+            elements: Elements::default(),
+            settings: Settings::default(),
+            text_scale: 1.0,
+        }
+    }
 }
 
 /// Appearance-only subset of WelcomeConfig captured by a profile. Activating a
 /// profile overlays these fields onto the live config; every settings.* field
 /// (network, autostart, schedule, locale, clock, QR, token) stays as-is.
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default)]
 pub struct ProfileContent {
     pub template_id: String,
@@ -174,6 +194,21 @@ pub struct ProfileContent {
     pub background: String,
     pub logo: String,
     pub elements: Elements,
+    /// Same semantics as WelcomeConfig::text_scale
+    pub text_scale: f64,
+}
+
+impl Default for ProfileContent {
+    fn default() -> Self {
+        Self {
+            template_id: String::new(),
+            welcome: WelcomeText::default(),
+            background: String::new(),
+            logo: String::new(),
+            elements: Elements::default(),
+            text_scale: 1.0,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

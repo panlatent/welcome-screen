@@ -393,6 +393,7 @@ fn sanitize_and_validate(cfg: &mut WelcomeConfig) -> Result<(), String> {
     sanitize_content_strings(
         &mut cfg.welcome,
         &mut cfg.elements,
+        &mut cfg.text_scale,
         &cfg.background,
         &cfg.logo,
     )?;
@@ -425,11 +426,13 @@ fn sanitize_and_validate(cfg: &mut WelcomeConfig) -> Result<(), String> {
 }
 
 /// Appearance fields shared by the live config and profiles: truncate greeting and
-/// marquee text, validate uploaded-file references (format only — a missing file
-/// keeps its reference and the screen falls back to the template default)
+/// marquee text, clamp the manual text-size preference, validate uploaded-file
+/// references (format only — a missing file keeps its reference and the screen
+/// falls back to the template default)
 fn sanitize_content_strings(
     welcome: &mut config::WelcomeText,
     elements: &mut config::Elements,
+    text_scale: &mut f64,
     background: &str,
     logo: &str,
 ) -> Result<(), String> {
@@ -437,6 +440,12 @@ fn sanitize_content_strings(
     clamp_len(&mut welcome.guest, 40);
     clamp_len(&mut welcome.subtitle, 30);
     clamp_len(&mut elements.marquee, 80);
+    // NaN/∞ would poison the screen's font-size math — fall back to the default
+    if !text_scale.is_finite() {
+        *text_scale = 1.0;
+    }
+    // Must mirror MIN_TEXT_SCALE / MAX_TEXT_SCALE in shared/fit.ts
+    *text_scale = text_scale.clamp(0.8, 1.5);
     for p in [background, logo] {
         if !p.is_empty() && !is_valid_file_path(p) {
             return Err(format!("Invalid file path: {p}"));
@@ -523,6 +532,7 @@ fn sanitize_profile_content(content: &mut ProfileContent) -> Result<(), String> 
     sanitize_content_strings(
         &mut content.welcome,
         &mut content.elements,
+        &mut content.text_scale,
         &content.background,
         &content.logo,
     )

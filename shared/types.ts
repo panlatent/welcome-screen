@@ -67,6 +67,9 @@ export interface WelcomeConfig {
   logo: string;
   elements: Elements;
   settings: Settings;
+  /** Manual greeting text-size preference (0.8–1.5 × the template design size);
+   * the screen always auto-shrinks long text to keep it on one line */
+  textScale: number;
 }
 
 /** Appearance-only subset of WelcomeConfig captured by a profile. Activating a
@@ -77,6 +80,7 @@ export interface ProfileContent {
   background: string;
   logo: string;
   elements: Elements;
+  textScale: number;
 }
 
 /** Profile list entry (content is only needed when activating, server-side) */
@@ -135,6 +139,7 @@ export function defaultConfig(): WelcomeConfig {
     background: "",
     logo: "",
     elements: { clock: true, date: true, marquee: "" },
+    textScale: 1,
     settings: {
       autoStart: false,
       setupDone: false,

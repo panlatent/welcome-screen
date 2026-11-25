@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Auto-fit greeting text: templates shrink the headline, guest name and closing
+  line to the largest size that keeps each line intact, and wrap very long guest
+  names into balanced lines instead of ragged breaks
+- Manual "Text size" preference (80%–150%) on the control page greeting card,
+  applied on top of the auto-fit so text can be enlarged but never wraps; the
+  preference is part of a profile's saved look
 - Minimize and exit actions under the kiosk's QR overlay. Minimizing keeps a taskbar button so the fullscreen screen can be brought back with one tap on the taskbar; exiting asks for a second tap to confirm
 
 ## [0.1.0] - 2026-09-27

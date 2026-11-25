@@ -5,6 +5,7 @@ import {
   type MarqueeSpeed,
   type WelcomeConfig,
 } from "../types";
+import { clampTextScale, fitFont, type FitOptions } from "../fit";
 import { resolveLocale } from "../i18n";
 import { formatDate, formatTime, useNow } from "../time";
 
@@ -12,6 +13,44 @@ const props = defineProps<{ config: WelcomeConfig; fileBase: string }>();
 const now = useNow();
 // Screen chrome follows the configured locale ("auto" = the kiosk OS language)
 const tplLocale = computed(() => resolveLocale(props.config.settings?.locale));
+
+// Greeting text auto-fit: sizes shrink with the text length to keep each line
+// intact (84cqw = the content area inside the 8cqw side paddings); the manual
+// textScale preference only moves the cap, so it can enlarge but never wrap
+const scale = computed(() => clampTextScale(props.config.textScale));
+const solo = computed(() => !props.config.welcome.guest);
+
+function fitStyle(text: string, opts: Omit<FitOptions, "scale">) {
+  const fit = fitFont(text, { ...opts, scale: scale.value });
+  return { fontSize: fit.fontSize, whiteSpace: fit.wrap ? "normal" : "nowrap" };
+}
+const titleStyle = computed(() =>
+  fitStyle(props.config.welcome.title, {
+    maxWidth: 84,
+    letterEm: 0.28,
+    capW: solo.value ? 10 : 6.5,
+    capH: solo.value ? 18 : 11,
+    floorW: 2,
+  }),
+);
+const guestStyle = computed(() =>
+  fitStyle(props.config.welcome.guest, {
+    maxWidth: 84,
+    letterEm: 0.06,
+    capW: 10.5,
+    capH: 19,
+    floorW: 3.8,
+  }),
+);
+const subtitleStyle = computed(() =>
+  fitStyle(props.config.welcome.subtitle, {
+    maxWidth: 84,
+    letterEm: 0.34,
+    capW: 4.2,
+    capH: 7.5,
+    floorW: 1.8,
+  }),
+);
 
 const bgStyle = computed(() => {
   const base =
@@ -50,13 +89,18 @@ const marqueeDuration = computed(
           v-if="config.welcome.title"
           class="title"
           :class="{ solo: !config.welcome.guest }"
+          :style="titleStyle"
         >
           {{ config.welcome.title }}
         </h1>
-        <div v-if="config.welcome.guest" class="guest">
+        <div v-if="config.welcome.guest" class="guest" :style="guestStyle">
           {{ config.welcome.guest }}
         </div>
-        <div v-if="config.welcome.subtitle" class="subtitle">
+        <div
+          v-if="config.welcome.subtitle"
+          class="subtitle"
+          :style="subtitleStyle"
+        >
           {{ config.welcome.subtitle }}
         </div>
       </main>
@@ -169,9 +213,10 @@ const marqueeDuration = computed(
   padding: 0 8cqw;
 }
 
+/* Font sizes come from fitFont() inline styles (auto-fit + manual textScale);
+   balance evens out the rare fallback to multiple lines */
 .title {
   font-family: "KaiTi", "STKaiti", "Microsoft YaHei", serif;
-  font-size: min(6.5cqw, 11cqh);
   letter-spacing: 0.28em;
   text-indent: 0.28em; /* offset trailing letter-spacing for visual centering */
   color: transparent;
@@ -181,14 +226,11 @@ const marqueeDuration = computed(
   margin-bottom: 4cqh;
   font-weight: 400;
   text-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
-}
-.title.solo {
-  font-size: min(10cqw, 18cqh);
+  text-wrap: balance;
 }
 
 .guest {
   font-family: "SimSun", "STSong", "Microsoft YaHei", serif;
-  font-size: min(10.5cqw, 19cqh);
   font-weight: 700;
   color: #fdf6e3;
   letter-spacing: 0.06em;
@@ -198,15 +240,16 @@ const marqueeDuration = computed(
     0 6px 30px rgba(0, 0, 0, 0.5);
   max-width: 84cqw;
   word-break: break-word;
+  text-wrap: balance;
 }
 
 .subtitle {
   margin-top: 3.5cqh;
   font-family: "KaiTi", "STKaiti", "Microsoft YaHei", serif;
-  font-size: min(4.2cqw, 7.5cqh);
   letter-spacing: 0.34em;
   text-indent: 0.34em;
   color: #eecf95;
+  text-wrap: balance;
 }
 
 .corner-info {

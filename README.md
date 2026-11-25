@@ -63,6 +63,10 @@ take effect within a second, with a smooth cross-fade.
   White (everyday), each with custom background image and logo support
 - **Display elements** — clock (12/24h, optional seconds), date, scrolling marquee
   (three speeds), individually toggleable
+- **Text auto-fit** — long headlines, guest names and closing lines shrink to the
+  largest size that stays on one line; very long guest names fall back to balanced
+  two-line layout; a control-page slider scales all greeting text (80%–150%)
+  without ever forcing a wrap
 - **Hidden QR code** — completely invisible during normal use; long-press the bottom
   corner for 1–5 seconds (configurable) to summon it, auto-hides after 10–120 seconds
 - **First-run setup mode** — on a fresh install the QR code stays on screen until the

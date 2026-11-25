@@ -117,6 +117,8 @@ const screenLocale = computed({
     form.settings.locale = v === "zh-CN" || v === "en" ? v : "auto";
   },
 });
+// Manual greeting text-size preference, shown as a percentage of the design size
+const scalePercent = computed(() => Math.round((form.textScale ?? 1) * 100));
 
 function readJson(key: string): unknown | null {
   try {
@@ -419,6 +421,7 @@ function contentFromConfig(cfg: WelcomeConfig): ProfileContent {
     background: cfg.background,
     logo: cfg.logo,
     elements: { ...cfg.elements },
+    textScale: cfg.textScale,
   };
 }
 
@@ -575,6 +578,7 @@ function mergeInto(target: WelcomeConfig, src: Partial<WelcomeConfig>) {
     background:
       typeof src.background === "string" ? src.background : d.background,
     logo: typeof src.logo === "string" ? src.logo : d.logo,
+    textScale: typeof src.textScale === "number" ? src.textScale : d.textScale,
   });
   target.welcome = { ...d.welcome, ...src.welcome };
   target.elements = { ...d.elements, ...src.elements };
@@ -750,6 +754,21 @@ async function resetDefaults() {
               maxlength="30"
               :placeholder="t('greeting.subtitlePlaceholder')"
             />
+          </div>
+          <div class="field">
+            <label>
+              {{ t("greeting.scaleLabel") }}
+              <span class="count">{{ scalePercent }}%</span>
+            </label>
+            <input
+              v-model.number="form.textScale"
+              type="range"
+              class="scale-range"
+              min="0.8"
+              max="1.5"
+              step="0.05"
+            />
+            <p class="tip">{{ t("greeting.scaleTip") }}</p>
           </div>
         </section>
 
